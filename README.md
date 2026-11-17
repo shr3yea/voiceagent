@@ -42,13 +42,21 @@ python3 -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Set the AssemblyAI key and relay settings in `.env`:
+Set the relay settings in `.env`. The AssemblyAI key may be stored there or
+exported in the terminal:
 
 ```dotenv
 ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
 RELAY_HOST=192.168.1.42
 RELAY_BIND_HOST=0.0.0.0
 RELAY_PORT=8765
+TTS_ENGINE=auto
+```
+
+Alternatively:
+
+```bash
+export ASSEMBLYAI_API_KEY=your_assemblyai_api_key_here
 ```
 
 - `RELAY_HOST` is the remote machine's address for a sender or peer.
@@ -90,6 +98,13 @@ terminal per person is enough.
 Press `Ctrl+C` to stop the microphone, queue workers, sockets, and AssemblyAI
 connection cleanly.
 
+On macOS, if you see `CERTIFICATE_VERIFY_FAILED`, run:
+
+```bash
+pip install --upgrade certifi
+export SSL_CERT_FILE="$(python3 -c 'import certifi; print(certifi.where())')"
+```
+
 ## Supported languages
 
 - English
@@ -129,14 +144,24 @@ transcript's UTF-8 byte length, and `network` is the complete encoded JSON
 message including its newline delimiter. Emergency messages are larger because
 they include `lat` and `lon`.
 
+## Testing offline behaviour
+
+Start the sender with no receiver running, speak a few sentences, then start
+the receiver. Confirm that the queued messages arrive in their original order.
+
 ## Known limitations
 
-- AssemblyAI, `edge-tts`, and the relay link require network connectivity.
+- The sender automatically reconnects with exponential backoff and keeps up to
+  100 pending messages in memory. Older non-emergency messages are dropped
+  first when full; the queue is lost if the sender exits.
+- `TTS_ENGINE=auto` uses `edge-tts` first and falls back to macOS `say` after
+  failures; `TTS_ENGINE=say` uses the offline voice directly. Edge failures
+  are remembered briefly to avoid waiting on every message.
 - Audio playback depends on macOS's `afplay` command.
 - Language routing is based only on Devanagari detection. Mixed-language turns
   and languages other than Hindi and English may be routed as English.
-- TCP delivery is reliable and ordered, but this demo has no offline queue,
-  persistence, acknowledgements, automatic reconnection, or encryption.
+- TCP delivery is reliable and ordered, but this demo has no persistence,
+  acknowledgements, or encryption.
 - IP geolocation is approximate and may be off by several kilometres.
 - If IP lookup fails, the relay uses the hardcoded test coordinates. Production
   deployments should replace them with real device GPS.

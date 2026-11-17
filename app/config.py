@@ -14,6 +14,7 @@ class Settings:
     relay_lat: float | None
     relay_lon: float | None
     location_source: str
+    tts_engine: str
 
 
 def load_settings(role: str) -> Settings:
@@ -30,6 +31,9 @@ def load_settings(role: str) -> Settings:
     location_source = os.getenv("LOCATION_SOURCE", "auto").lower()
     if location_source not in ("manual", "ip", "auto"):
         raise ValueError("LOCATION_SOURCE must be manual, ip, or auto")
+    tts_engine = os.getenv("TTS_ENGINE", "auto").lower()
+    if tts_engine not in ("auto", "edge", "say"):
+        raise ValueError("TTS_ENGINE must be auto, edge, or say")
 
     return Settings(
         assemblyai_api_key=os.getenv("ASSEMBLYAI_API_KEY"),
@@ -40,4 +44,5 @@ def load_settings(role: str) -> Settings:
         relay_lat=float(relay_lat_value) if relay_lat_value else None,
         relay_lon=float(relay_lon_value) if relay_lon_value else None,
         location_source=location_source,
+        tts_engine=tts_engine,
     )
