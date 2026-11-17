@@ -1,0 +1,6 @@
+assemblyai
+edge-tts
+groq
+python-dotenv
+sounddevice
+
