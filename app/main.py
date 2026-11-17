@@ -41,6 +41,7 @@ EMERGENCY_KEYWORD_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+
 def find_emergency_keyword(text: str) -> str | None:
     match = EMERGENCY_KEYWORD_PATTERN.search(text)
     return match.group(1) if match is not None else None
